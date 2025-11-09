@@ -1,158 +1,138 @@
-# Real-Time Alert Monitoring System using OpenCV and Tkinter
+Here is a detailed README file tailored for the provided Driver Safety Monitoring System code.
+
+-----
+
+# Driver Safety Monitoring System (DSMS)
 
 ## 📘 Overview
 
-This project is a **real-time alert monitoring system** built using **Python**, **OpenCV**, **Tkinter**, and **text-to-speech (pyttsx3)**.  
-It detects different alerts such as *Motion Detected*, *Person Detected*, *No Activity*, or *Camera Error* and displays them on a GUI interface with **color-coded alert buttons** and **voice alerts**.
+The **Driver Safety Monitoring System (DSMS)** is an advanced, real-time computer vision application designed to enhance road safety by monitoring driver behavior. Built with **Python**, **OpenCV**, and **MediaPipe**, it utilizes a standard webcam to detect signs of fatigue, distraction, and unsafe practices.
 
-The system is designed for real-time security or surveillance applications — capable of visual detection, automatic alert triggering, and human-like voice responses.
+Unlike simple drowsiness detectors, this system employs a multi-faceted approach—analyzing eye closure (PERCLOS/EAR), blink rates, head orientation (pose estimation), facial emotions, and hand-to-face gestures—to provide a comprehensive safety assessment. It features a modern, dark-themed **Tkinter dashboard** for real-time metrics and uses **text-to-speech** for audible alerts.
 
----
+-----
 
-## 🧠 Features
+## 🧠 Detailed Features
 
-- 🖥️ **Desktop Interface** built with Tkinter  
-- 🎯 **Real-time Detection** using OpenCV  
-- 🗣️ **Voice Alerts** using `pyttsx3` text-to-speech engine  
-- 🔴 **Color-Coded Buttons** for each alert type (turn red when active)  
-- ⏱️ **Alert Persistence** – Each alert remains visible for 5–10 seconds  
-- 📸 **Live Video Feed** integrated with the detection system  
-- 🔔 **Beep fallback** in case of TTS delay or voice issue  
+### 1\. Drowsiness & Fatigue Detection
 
----
+  * **Blink Rate Monitoring:** Tracks the number of blinks in a sliding 30-second window. Fails to meet the minimum threshold triggers a "DROWSY" alert.
+  * **Unresponsive Emergency Protocol:** Detects prolonged eye closure (\>10 seconds) indicating potential unconsciousness or severe microsleep, triggering an immediate, high-priority emergency voice alert and stopping other audio.
+  * **Yawn Detection:** Monitors the Mouth Aspect Ratio (MAR) to identify frequent yawning as an early fatigue indicator.
+
+### 2\. Distraction & Behavior Monitoring
+
+  * **Head Pose Estimation:** Uses a 3D-to-2D point correspondence (PnP problem) to calculate the driver's head yaw. Looking away from the road (\>25°) for more than 3 seconds triggers a "DISTRACTED" alert.
+  * **Phone Usage Detection:** Utilizes hand tracking to detect if a hand is raised near the face region while driving, indicative of phone calls or active handheld usage.
+
+### 3\. Advanced Capabilities
+
+  * **Auto-Calibration:** Upon startup, the system runs a 5-second calibration phase to learn the driver's baseline eye openness (EAR), adjusting thresholds dynamically for different users and lighting conditions.
+  * **Mood Analysis (Optional):** Integrates with Facial Emotion Recognition (FER) to periodically sample the driver's emotional state. If negative emotions (anger, sadness) are detected, it offers calming voice suggestions.
+  * **Mixed Alert Logic:** Intelligently combines simultaneous events into single, coherent voice warnings (e.g., *"Warning: Drowsiness and Phone usage detected"*) instead of overlapping audio.
+
+### 4\. Reporting
+
+  * **Event Logging:** All safety events are timestamped and logged automatically to `driver_events.csv` for post-trip analysis.
+
+-----
+
+## 🛠️ Technical Architecture
+
+  * **Core Engine:** Python 3.x
+  * **Computer Vision:**
+      * `MediaPipe Face Mesh` (468 landmarks) for precise eye/mouth tracking.
+      * `MediaPipe Hands` for gesture/phone detection.
+      * `OpenCV` for frame processing and pose estimation math.
+  * **GUI:** `Tkinter` with `ttk` styling for the dashboard.
+  * **Audio:** `gTTS` (Google Text-to-Speech) for generating prompts and `pygame` for non-blocking playback.
+  * **Concurrency:** Threaded architecture for TTS (Text-to-Speech) to ensure audio alerts do not freeze the video processing loop.
+
+-----
+
+## ⚙️ Installation & Setup
+
+### Prerequisites
+
+  * Python 3.8 or higher
+  * A working webcam
+
+### 1\. Clone/Download
+
+Download the `app.py` file to your local machine.
+
+### 2\. Install Dependencies
+
+The system relies on several external libraries. Run the following command in your terminal:
+
+```bash
+pip install opencv-python mediapipe numpy pillow
+```
+
+### 3\. Optional (But Recommended) Dependencies
+
+For full functionality (Voice Alerts and Mood Detection), install these additional libraries. If skipped, the system will run in a "silent" mode without these features.
+
+```bash
+pip install gTTS pygame fer tensorflow
+```
+
+*(Note: `fer` requires `tensorflow` or similar backend for its models).*
+
+-----
+
+## 🖥️ Usage Guide
+
+1.  **Connect Webcam:** Ensure your camera is connected and not being used by another application.
+2.  **Run Application:**
+    ```bash
+    python app.py
+    ```
+3.  **Calibration Phase:**
+      * When the dashboard opens, click the green **START** button.
+      * Sit still and look straight ahead for 5 seconds while the system displays "CALIBRATING...".
+      * Once calibrated, the status will change to **ACTIVE**.
+4.  **Monitoring:**
+      * Drive (simulated or real). The dashboard will display real-time metrics.
+      * **Red Badges** indicate active alerts.
+      * **Status Label** changes color based on severity (Green=Good, Orange=Warning, Red=Emergency).
+5.  **Stop:** Click **STOP** to end the session and save final logs.
+
+-----
+
+## 🔧 Configuration (Advanced)
+
+You can customize the sensitivity of the system by modifying the constants at the top of `app.py`:
+
+| Constant | Default | Description |
+| :--- | :--- | :--- |
+| `WINDOW_S` | 30 | Duration (seconds) of the sliding window for counting blinks. |
+| `MIN_BLINKS...`| 5 | Minimum blinks required in the window before flagging drowsiness. |
+| `UNCONSCIOUS_SEC`| 10 | Seconds of continuous eye closure to trigger emergency alert. |
+| `ATTENTION_YAW...`| 25.0 | Head turning angle (degrees) considered as "looking away". |
+| `ATTENTION_TIME...`| 3.0 | Seconds allowed looking away before triggering distraction alert. |
+| `MAR_YAWN_THRESH`| 0.60 | Threshold for Mouth Aspect Ratio to register a yawn. |
+| `ALERT_COOLDOWN` | 12.0 | Minimum seconds between repeating the exact same voice alert. |
+
+-----
 
 ## 📁 Project Structure
 
-📦 Alert-Monitoring-System
-│
-├── app.py # Main application file (Tkinter + OpenCV)
-├── requirements.txt # Python dependencies
-├── README.md # Project documentation
-└── assets/ # Optional folder for icons, models, etc.
+```
+├── app.py                 # Main application entry point
+├── driver_events.csv      # Auto-generated log file (created on first run)
+└── README.md              # This documentation
+```
 
+-----
 
+## ⚠️ Troubleshooting
 
-## ⚙️ Requirements
-
-Make sure you have Python 3.8+ installed.  
-Then install the required dependencies using:
-
-
-pip install -r requirements.txt
-requirements.txt
-
-opencv-python
-tkinter
-pyttsx3
-playsound
-
-## ▶️ How to Run
-Run the app using the following command:
-
-python app.py
-Once the application starts:
-
-# You’ll see a GUI window with alert buttons (e.g., Motion, Person, No Activity, Camera Error).
-
-# The live camera feed starts in the background.
-
-# When an alert condition is detected:
-- The corresponding button turns red for a few seconds.
-
-- A voice alert announces the event (e.g., “Motion detected!”).
-
-- After 5–10 seconds, the button returns to normal color.
-
-## 🧩 Code Explanation (app.py)
-- 1. Imports and Initialization
-python
-Copy code
-import cv2
-import pyttsx3
-import tkinter as tk
-from tkinter import messagebox
-import threading
-import time
-cv2 – captures video frames from the webcam.
-
-tkinter – builds the GUI for alerts.
-
-pyttsx3 – provides offline text-to-speech functionality.
-
-threading – ensures GUI responsiveness during video processing.
-
-- 2. Voice Alert System
-python
-Copy code
-engine = pyttsx3.init()
-def speak_alert(message):
-    engine.say(message)
-    engine.runAndWait()
-This initializes the TTS engine and speaks any alert message.
-
-Used in a separate thread to prevent UI freezing.
-
-- 3. Alert Button Setup
-Each alert type (e.g., motion, person, error) has a button on the Tkinter window.
-
-motion_button = tk.Button(root, text="Motion Alert", bg="lightgrey")
-person_button = tk.Button(root, text="Person Detected", bg="lightgrey")
-When an alert occurs, the button turns red:
-
-
-motion_button.config(bg="red")
-root.after(5000, lambda: motion_button.config(bg="lightgrey"))
-4. Camera Feed and Detection
-The system uses OpenCV to read frames from the webcam:
-
-cap = cv2.VideoCapture(0)
-ret, frame = cap.read()
-Each frame is processed for movement or object detection.
-If detection conditions are met → triggers the respective alert.
-
-- 5. Voice + GUI Alerts Integration
-When an alert is detected:
-
-def trigger_alert(alert_name, message):
-    update_button(alert_name)
-    threading.Thread(target=speak_alert, args=(message,)).start()
-This function:
-
-Changes the corresponding button color.
-
-Starts a voice thread to speak the alert.
-
-Keeps the alert visible for 5–10 seconds.
-
-- 6. Main Loop
-python
-Copy code
-root.mainloop()
-The Tkinter event loop keeps the GUI running while the OpenCV camera runs in parallel threads.
-
-## 🔊 Voice Alert Behavior
-The first voice alert triggers immediately when detected.
-
-Subsequent alerts are queued and spoken sequentially to avoid overlap.
-
-If the TTS system lags, a fallback beep sound plays to ensure responsiveness.
-
-## Future Enhancements
-Add email or SMS notifications for critical alerts.
-
-Integrate face or object recognition.
-
-Store event logs with timestamps.
-
-Create a dashboard for analytics.
-
-## 🧑‍💻 Author
-- Developed by: Radhika Kachare and Shraddha Patil
-- Purpose: Educational / Real-time alert system for security & surveillance.
-- Language: Python 3
-- Frameworks: OpenCV, Tkinter
-
-## 🪪 License
-This project is open-source under the MIT License.
-Feel free to modify and enhance it for your own applications.
-
+  * **"gTTS or pygame not found"**: detected in console.
+      * *Solution:* Voice alerts are disabled. Install them using `pip install gTTS pygame`.
+  * **"FER library not found"**: detected in console.
+      * *Solution:* Mood detection disabled. Install using `pip install fer`.
+  * **Camera not opening**:
+      * *Solution:* Check if another app (Zoom, Teams) is using the camera. You may need to change `cv2.VideoCapture(0)` to `(1)` if you have multiple cameras.
+  * **False Positives (Drowsiness)**:
+      * *Solution:* Ensure good lighting on the driver's face. Reflections on glasses can sometimes interfere with eye tracking. Rerun calibration by stopping and starting again.
