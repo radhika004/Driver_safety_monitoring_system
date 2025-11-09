@@ -1,0 +1,9 @@
+opencv-python
+mediapipe
+numpy
+Pillow
+gTTS
+pygame
+fer
+mtcnn
+ttkbootstrap
