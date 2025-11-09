@@ -30,10 +30,7 @@ The system is designed for real-time security or surveillance applications — c
 ├── README.md # Project documentation
 └── assets/ # Optional folder for icons, models, etc.
 
-yaml
-Copy code
 
----
 
 ## ⚙️ Requirements
 
@@ -44,33 +41,30 @@ Then install the required dependencies using:
 pip install -r requirements.txt
 requirements.txt
 
-Copy code
 opencv-python
 tkinter
 pyttsx3
 playsound
-▶️ How to Run
+
+## ▶️ How to Run
 Run the app using the following command:
 
-bash
-Copy code
 python app.py
 Once the application starts:
 
-You’ll see a GUI window with alert buttons (e.g., Motion, Person, No Activity, Camera Error).
+# You’ll see a GUI window with alert buttons (e.g., Motion, Person, No Activity, Camera Error).
 
-The live camera feed starts in the background.
+# The live camera feed starts in the background.
 
-When an alert condition is detected:
+# When an alert condition is detected:
+- The corresponding button turns red for a few seconds.
 
-The corresponding button turns red for a few seconds.
+- A voice alert announces the event (e.g., “Motion detected!”).
 
-A voice alert announces the event (e.g., “Motion detected!”).
+- After 5–10 seconds, the button returns to normal color.
 
-After 5–10 seconds, the button returns to normal color.
-
-🧩 Code Explanation (app.py)
-1. Imports and Initialization
+## 🧩 Code Explanation (app.py)
+- 1. Imports and Initialization
 python
 Copy code
 import cv2
@@ -87,7 +81,7 @@ pyttsx3 – provides offline text-to-speech functionality.
 
 threading – ensures GUI responsiveness during video processing.
 
-2. Voice Alert System
+- 2. Voice Alert System
 python
 Copy code
 engine = pyttsx3.init()
@@ -98,34 +92,27 @@ This initializes the TTS engine and speaks any alert message.
 
 Used in a separate thread to prevent UI freezing.
 
-3. Alert Button Setup
+- 3. Alert Button Setup
 Each alert type (e.g., motion, person, error) has a button on the Tkinter window.
 
-python
-Copy code
 motion_button = tk.Button(root, text="Motion Alert", bg="lightgrey")
 person_button = tk.Button(root, text="Person Detected", bg="lightgrey")
 When an alert occurs, the button turns red:
 
-python
-Copy code
+
 motion_button.config(bg="red")
 root.after(5000, lambda: motion_button.config(bg="lightgrey"))
 4. Camera Feed and Detection
 The system uses OpenCV to read frames from the webcam:
 
-python
-Copy code
 cap = cv2.VideoCapture(0)
 ret, frame = cap.read()
 Each frame is processed for movement or object detection.
 If detection conditions are met → triggers the respective alert.
 
-5. Voice + GUI Alerts Integration
+- 5. Voice + GUI Alerts Integration
 When an alert is detected:
 
-python
-Copy code
 def trigger_alert(alert_name, message):
     update_button(alert_name)
     threading.Thread(target=speak_alert, args=(message,)).start()
@@ -137,27 +124,20 @@ Starts a voice thread to speak the alert.
 
 Keeps the alert visible for 5–10 seconds.
 
-6. Main Loop
+- 6. Main Loop
 python
 Copy code
 root.mainloop()
 The Tkinter event loop keeps the GUI running while the OpenCV camera runs in parallel threads.
 
-🔊 Voice Alert Behavior
+## 🔊 Voice Alert Behavior
 The first voice alert triggers immediately when detected.
 
 Subsequent alerts are queued and spoken sequentially to avoid overlap.
 
 If the TTS system lags, a fallback beep sound plays to ensure responsiveness.
 
-🧪 Example Alerts Table
-Alert Type	Color	Voice Message	Duration	Example Trigger
-Motion Detected	🔴 Red	“Motion detected!”	5 sec	Object movement in frame
-Person Detected	🔴 Red	“Person detected!”	5 sec	Human presence in video
-No Activity	🟢 Grey	“No movement detected”	5 sec	No change for long duration
-Camera Error	🔴 Red	“Camera disconnected”	10 sec	Webcam failure or not found
-
-💡 Future Enhancements
+## Future Enhancements
 Add email or SMS notifications for critical alerts.
 
 Integrate face or object recognition.
@@ -166,15 +146,13 @@ Store event logs with timestamps.
 
 Create a dashboard for analytics.
 
-🧑‍💻 Author
-Developed by: Radhika
-Purpose: Educational / Real-time alert system for security & surveillance.
-Language: Python 3
-Frameworks: OpenCV, Tkinter
+## 🧑‍💻 Author
+- Developed by: Radhika Kachare and Shraddha Patil
+- Purpose: Educational / Real-time alert system for security & surveillance.
+- Language: Python 3
+- Frameworks: OpenCV, Tkinter
 
-🪪 License
+## 🪪 License
 This project is open-source under the MIT License.
 Feel free to modify and enhance it for your own applications.
 
-yaml
-Copy code
